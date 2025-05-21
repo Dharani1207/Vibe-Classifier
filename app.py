@@ -6,6 +6,7 @@ from PIL import Image
 import joblib
 import os
 import requests
+import gdown
 
 # === Load model and scaler ===
 from model import DualResNetWithMetadata  # Make sure model.py is in the same folder
@@ -16,13 +17,9 @@ SCALER_PATH = "scaler.pkl"
 LABEL_MAP = {0: "fun_vibe_here", 1: "i_love_it_here", 2: "not_my_vibe", 3: "why_god_why"}
 
 if not os.path.exists(MODEL_PATH):
-    print("Downloading model...")
-    response = requests.get(MODEL_URL, stream=True)
-    with open(MODEL_PATH, 'wb') as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            if chunk:
-                f.write(chunk)
-    print("Model downloaded.")
+    print("Downloading model via gdown...")
+    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+    print(" Model downloaded.")
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

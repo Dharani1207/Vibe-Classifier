@@ -15,6 +15,7 @@ earthengine-api
 osmnx>=1.5.1
 shapely>=1.7
 folium
+gdown
 
 # Web/IO
 requests
