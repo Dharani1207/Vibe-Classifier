@@ -5,8 +5,11 @@ import numpy as np
 from PIL import Image
 import joblib
 import os
-import requests
 import gdown
+import pandas as pd
+import folium
+from folium.plugins import MarkerCluster
+from streamlit_folium import st_folium
 
 # === Load model and scaler ===
 from model import DualResNetWithMetadata  # Make sure model.py is in the same folder
@@ -19,8 +22,7 @@ LABEL_MAP = {0: "fun_vibe_here", 1: "i_love_it_here", 2: "not_my_vibe", 3: "why_
 if not os.path.exists(MODEL_PATH):
     print("Downloading model via gdown...")
     gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
-    print(" Model downloaded.")
-
+    print("Model downloaded.")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = DualResNetWithMetadata(tabular_dim=5, num_classes=4)  # Adjust dim if needed
@@ -75,20 +77,18 @@ if sentinel_file and osm_file:
         road_length = road_density * 50 + np.random.normal(10, 5)  # Proxy computation
         populartimes_peak_avg = np.random.randint(30, 100)  # Simulated value
 
-
         # Match training features exactly
         traffic_onehot = [
             int(traffic_level == "low"),
             int(traffic_level == "medium"),
         ]  # traffic_level_high is implicitly False
 
-        tabular_raw = np.array([[ 
+        tabular_raw = np.array([[
             dist_to_park,
             road_density,
             road_length,
             *traffic_onehot
         ]])
-
 
         tabular_scaled = scaler.transform(tabular_raw)
         tabular_tensor = torch.tensor(tabular_scaled, dtype=torch.float32).to(device)
@@ -104,3 +104,49 @@ if sentinel_file and osm_file:
 
 else:
     st.warning("Please upload both Sentinel and OSM images to proceed.")
+
+# === Vibe Classes Map from CSV ===
+st.markdown("---")
+st.header("🗺️ Vibe Map")
+
+DATA_PATH = "datasets/vibe_full_features.csv"
+
+try:
+    df = pd.read_csv(DATA_PATH)
+    # Adjust column names here to your csv exactly
+    df = df.rename(columns=lambda x: x.strip())  # remove whitespace if any
+    # Using exact names you gave: lat, lon, vibe_class (adjust if different)
+    lat_col = "lat"
+    lon_col = "lon"
+    vibe_col = "vibe_class"
+    if all(col in df.columns for col in [lat_col, lon_col, vibe_col]):
+        df = df[[lat_col, lon_col, vibe_col]].dropna()
+
+        # Simple color map for vibe classes - add more if needed
+        color_map = {
+            "fun_vibe_here": "green",
+            "i_love_it_here": "blue",
+            "not_my_vibe": "orange",
+            "why_god_why": "red"
+        }
+
+        center = [df[lat_col].mean(), df[lon_col].mean()]
+        m = folium.Map(location=center, zoom_start=6, tiles="CartoDB positron")
+
+        marker_cluster = MarkerCluster().add_to(m)
+
+        for _, row in df.iterrows():
+            folium.Marker(
+                location=[row[lat_col], row[lon_col]],
+                popup=f"Vibe: {row[vibe_col]}",
+                icon=folium.Icon(color=color_map.get(row[vibe_col], "gray"))
+            ).add_to(marker_cluster)
+
+        st_folium(m, width=1000, height=700)
+
+    else:
+        st.error(f"CSV must contain columns: '{lat_col}', '{lon_col}', '{vibe_col}'")
+except FileNotFoundError:
+    st.error(f"File not found: `{DATA_PATH}`")
+except Exception as e:
+    st.error(f"Error loading CSV data: {e}")
