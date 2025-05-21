@@ -20,17 +20,4 @@ folium
 requests
 tqdm
 
-# Optional: if using icrawler for scraping backup images
-icrawler
 
-# TorchMetrics for evaluation
-torchmetrics
-
-# Google Populartimes
-populartimes
-
-# If  XGBoost or other models used optionally
-xgboost
-
-# For image augmentation or CV utils if needed later
-opencv-python-headless
