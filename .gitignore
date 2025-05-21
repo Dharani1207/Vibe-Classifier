@@ -1,0 +1,18 @@
+# Ignore everything inside datasets folder...
+datasets/*
+
+# ...but not this file
+!datasets/vibe_full_features.csv
+
+# Ignore all image formats globally
+*.png
+*.jpg
+*.jpeg
+*.tiff
+
+# Ignore environment & IDE junk
+.DS_Store
+__pycache__/
+*.pyc
+.vscode/
+.env
