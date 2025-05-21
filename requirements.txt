@@ -1,6 +1,6 @@
 # === Core Dependencies ===
-torch>=1.13.0
-torchvision>=0.14.0
+torch==2.1.2
+torchvision==0.16.2
 torchaudio
 timm
 albumentations

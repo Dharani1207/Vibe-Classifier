@@ -1,4 +1,8 @@
 import streamlit as st
+import sys
+if "torch" in sys.modules:
+    import torch
+    torch.classes = None  # prevents Streamlit from trying to inspect it
 import torch
 import torchvision.transforms as transforms
 import numpy as np
@@ -65,8 +69,8 @@ if sentinel_file and osm_file:
     sentinel_image = Image.open(sentinel_file).convert("RGB")
     osm_image = Image.open(osm_file).convert("RGB")
 
-    st.image(sentinel_image, caption="🛰️ Sentinel Image", use_column_width=True)
-    st.image(osm_image, caption="🗺️ OSM / Place Image", use_column_width=True)
+    st.image(sentinel_image, caption="🛰️ Sentinel Image", use_container_width=True)
+    st.image(osm_image, caption="🗺️ OSM / Place Image", use_container_width=True)
 
     if st.button("🔮 Predict Vibe"):
         # === Image tensors ===
