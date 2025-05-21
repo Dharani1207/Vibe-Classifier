@@ -1,5 +1,12 @@
 # Ignore everything inside datasets folder...
 datasets/*
+!datasets/.gitkeep
+
+checkpoints/*
+!checkpoints/.gitkeep
+
+results/*
+!results/.gitkeep
 
 # ...but not this file
 !datasets/vibe_full_features.csv
@@ -9,6 +16,8 @@ datasets/*
 *.jpg
 *.jpeg
 *.tiff
+*.pt
+*.pth
 
 # Ignore environment & IDE junk
 .DS_Store
